@@ -1,0 +1,83 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This repo contains the replication material for the journal article '(When) do Electoral Mandates Set the Agenda? Government Capacity and Mandate Responsiveness in Germany' published in the European Journal of Political Research
+
+## Structure of the repo
+
+The repo consists in three different folders: 
+
+  + [data]() : data required to replicate our findings
+  + [models]() : do-file and r-script to replicate the models
+  + [figures]() : R-Code to replicate the figures 
+
+Because Panel-Poisson Regression with FE is not properly implemented in R, we estimated some of the models in Stata. For this reason, the replication code mixes do-files and R-Script. 
+
+## Packages
+
+```{r}
+library(tidyverse, quietly = T)
+```
+
+
+## Data
+
+### data/monthly.csv
+
+The main arguments of our paper is tested at the month level. It hence includes data for the most important variables at the month X topic level. It is provided as a csv-file, named 'monthly.csv'.
+
+It contains following columns: 
+
+  + n_laws: Number of laws adopted in a given month in a given topic
+  + month: Concerned Month
+  + topic: Concerned CAP Topic
+  + salience_seat: Average salience of the topic in the manifestos of the coalition partners (weighted by number of seats)
+  + clp: Cumulative Law Production
+  + time: Cumulative number of months since beginning of the dataset
+  + ideo_gov: Ideological orientation of a coalition ('Scharz-Gelb', 'Rot-Grün', 'Big coalition')
+  + gov_pop_l1: Average government popularity in the last six months
+  + mip_share_l1: Proportion of 'Most-Important Problem' in a given topics in the last six months
+  + bundesratmaj: 1 if the governing coalition enjoyed majority in the Bundesrat
+  + elec_cycle_12: Elecotral cycle (First 12 months/Routine/Last 12 months)
+  + rile_diff: Absolute difference between the left-right position of coalition partners
+  + salience_diff: Absolute difference between the salience of a given topic in the manifestos of the coalition partners
+  + europe: Percentage of laws within a topic within a given period influenced by the EU
+  + account_balance_perc_l1: Budget account balance in the last six months
+  + salience_chanc: Salience of the topic in the manifesto of the chancellor party
+  + salience_partner: Salience of the topic in the manifesto of the junior partner
+  + salience_gov: Average salience of the topic in the manifestos of the coalition partners (no weights)
+  + salience_perc: Average salience of the topic in the manifestos of the coalition partners (weighted by each party's vote percentage)
+  
+```{r}
+readr::read_csv("data/monthly.csv") %>% glimpse
+```
+  
+### data/term_level.csv  
+  
+We also provide a file aggregated at the level of the term to replicate some of the results presented in the appendix. It contains following variables: 
+
++ n_laws: Number of laws adopted in a given term in a given topic
++ topic: Concerned CAP Topic
++ salience_seat: Average salience of the topic in the manifestos of the coalition partners (weighted by number of seats)
++ time: Number of terms since the beginning of the dataset
++ europe: Proportion of laws within a given topic and a given term influenced by the European Union
++ mip_share: Proportion of 'Most-Important Problem' in a given topics in a given term
++ account_balance_perc: Average Budget account balance
++ rile_diff: Absolute difference between the left-right position of coalition partners
++ salience_diff: Absolute difference between the salience of a given topic in the manifestos of the coalition partners
+
+```{r}
+readr::read_csv("data/term_level.csv") %>%
+  glimpse
+```
+

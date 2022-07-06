@@ -1,0 +1,55 @@
+---
+title: "Models estimated in R"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This repo contains the r-code to replicate the models estimated in R. For the models, estimated in Stata please consult the do-file. 
+
+## Package
+
+```{r}
+# devtools::install_github("benjaminguinaudeau/margins.pglm")
+pacman::p_load(tidyverse, pglm, margins.pglm, pscl)
+```
+
+
+## Data
+
+```{r}
+df <- readr::read_csv("../data/monthly.csv")
+```
+
+## Models
+
+```{r}
+formula_3 <- n_laws ~ salience_seat + clp + time + elec_cycle_12 + gov_pop_l1 + 
+    # mip_share_l1 + 
+  bundesratmaj + rile_diff + salience_diff + 
+    europe + account_balance_perc_l1
+
+formula_fe <- n_laws ~ salience_seat + clp + time + elec_cycle_12 + gov_pop_l1 + #mip_share_l1 + 
+  europe + account_balance_perc_l1 +
+  bundesratmaj + 
+  rile_diff +
+  salience_diff +
+  topic
+
+# 11: Poisson without FE
+fit_po <- glm(formula_3, data = df, family = "poisson")
+# 12: Poisson with FE
+fit_po_fe <- glm(formula_fe, data = df, family = "poisson")
+# 13: Negative binomial without FE
+fit_nb <- MASS::glm.nb(formula_3, data = df)
+# 14: Negative binomial with FE
+fit_nb_fe <- MASS::glm.nb(formula_fe, data = df)
+# 15: Zero-Inflated Negative binomial without FE
+fit_zi <- zeroinfl(formula_3, data = df, dist = "negbin")
+# 16: Zero-Inflated Negative binomial with FE
+fit_zi_fe <- zeroinfl(formula_fe, data = df, dist = "negbin")
+```
+
+
