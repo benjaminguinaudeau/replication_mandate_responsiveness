@@ -17,11 +17,10 @@ This repo contains the replication material for the journal article '(When) do E
 
 The repo consists in three different folders: 
 
-  + [data]() : data required to replicate our findings
-  + [models]() : do-file and r-script to replicate the models
-  + [figures]() : R-Code to replicate the figures 
++ [data](https://github.com/benjaminguinaudeau/replication_mandate_responsiveness/tree/master/data) : data required to replicate our findings
++ [models](https://github.com/benjaminguinaudeau/replication_mandate_responsiveness/tree/master/models) : do-file and r-script to replicate the models
 
-Because Panel-Poisson Regression with FE is not properly implemented in R, we estimated some of the models in Stata. For this reason, the replication code mixes do-files and R-Script. 
+Because Panel-Poisson Regression with FE is not properly implemented in R, we estimated some of the models in Stata 13.1. For this reason, the replication code includes both one do-file and one R-Script. 
 
 ## Packages
 
@@ -38,32 +37,34 @@ The main arguments of our paper is tested at the month level. It hence includes 
 
 It contains following columns: 
 
-  + n_laws: Number of laws adopted in a given month in a given topic
-  + month: Concerned Month
-  + topic: Concerned CAP Topic
-  + salience_seat: Average salience of the topic in the manifestos of the coalition partners (weighted by number of seats)
-  + clp: Cumulative Law Production
-  + time: Cumulative number of months since beginning of the dataset
-  + ideo_gov: Ideological orientation of a coalition ('Scharz-Gelb', 'Rot-Grün', 'Big coalition')
-  + gov_pop_l1: Average government popularity in the last six months
-  + mip_share_l1: Proportion of 'Most-Important Problem' in a given topics in the last six months
-  + bundesratmaj: 1 if the governing coalition enjoyed majority in the Bundesrat
-  + elec_cycle_12: Elecotral cycle (First 12 months/Routine/Last 12 months)
-  + rile_diff: Absolute difference between the left-right position of coalition partners
-  + salience_diff: Absolute difference between the salience of a given topic in the manifestos of the coalition partners
-  + europe: Percentage of laws within a topic within a given period influenced by the EU
-  + account_balance_perc_l1: Budget account balance in the last six months
-  + salience_chanc: Salience of the topic in the manifesto of the chancellor party
-  + salience_partner: Salience of the topic in the manifesto of the junior partner
-  + salience_gov: Average salience of the topic in the manifestos of the coalition partners (no weights)
-  + salience_perc: Average salience of the topic in the manifestos of the coalition partners (weighted by each party's vote percentage)
-  
++ n_laws: Number of laws adopted in a given month in a given topic
++ month: Concerned Month
++ topic: Concerned CAP Topic
++ salience_seat: Average salience of the topic in the manifestos of the coalition partners (weighted by number of seats)
++ clp: Cumulative Law Production
++ time: Cumulative number of months since beginning of the dataset
++ ideo_gov: Ideological orientation of a coalition ('Scharz-Gelb', 'Rot-Grün', 'Big coalition')
++ gov_pop_l1: Average government popularity in the last six months
++ bundesratmaj: 1 if the governing coalition enjoyed majority in the Bundesrat
++ elec_cycle_12: Elecotral cycle (First 12 months/Routine/Last 12 months)
++ rile_diff: Absolute difference between the left-right position of coalition partners
++ salience_diff: Absolute difference between the salience of a given topic in the manifestos of the coalition partners
++ europe: Percentage of laws within a topic within a given period influenced by the EU
++ account_balance_perc_l1: Budget account balance in the last six months
++ salience_chanc: Salience of the topic in the manifesto of the chancellor party
++ salience_partner: Salience of the topic in the manifesto of the junior partner
++ salience_gov: Average salience of the topic in the manifestos of the coalition partners (no weights)
++ salience_perc: Average salience of the topic in the manifestos of the coalition partners (weighted by each party's vote percentage)
++ gov_pop_delta: First difference of the government popularity between the last month and the actual month
+
+
 ```{r}
-readr::read_csv("data/monthly.csv") %>% glimpse
+dplyr::glimpse(readr::read_csv("data/monthly.csv", show_col_types = FALSE))
 ```
-  
+
+
 ### data/term_level.csv  
-  
+
 We also provide a file aggregated at the level of the term to replicate some of the results presented in the appendix. It contains following variables: 
 
 + n_laws: Number of laws adopted in a given term in a given topic
@@ -71,13 +72,120 @@ We also provide a file aggregated at the level of the term to replicate some of 
 + salience_seat: Average salience of the topic in the manifestos of the coalition partners (weighted by number of seats)
 + time: Number of terms since the beginning of the dataset
 + europe: Proportion of laws within a given topic and a given term influenced by the European Union
-+ mip_share: Proportion of 'Most-Important Problem' in a given topics in a given term
 + account_balance_perc: Average Budget account balance
 + rile_diff: Absolute difference between the left-right position of coalition partners
 + salience_diff: Absolute difference between the salience of a given topic in the manifestos of the coalition partners
 
 ```{r}
-readr::read_csv("data/term_level.csv") %>%
-  glimpse
+dplyr::glimpse(readr::read_csv("data/term_level.csv", show_col_types = FALSE))
 ```
 
+### data/salience_percentage.csv
+
+In this file, data are also included at the term level but the dependent variable is computed as the proportion of all laws adopted within a given legislature. This allows to normlasize for the total number of adopted laws, which varies across the period. The columns are essentially the same than in the term level data, with one exception:
+
++ law_prop: Proportion of laws adopted in a given term in a given topic
+
+
+```{r}
+dplyr::glimpse(readr::read_csv("data/salience_percentage.csv", show_col_types = FALSE))
+```
+
+### data/no_eu.csv
+
+This dataset is the same as monthly.csv, but was generated after removing all laws impacted by the EU. 
+
+```{r}
+dplyr::glimpse(readr::read_csv("data/no_eu.csv", show_col_types = FALSE))
+```
+
+## Models
+
+| Model # | Script | Data |
+|---|---|---|
+| 1-10 | Stata | monthly.csv |
+| 11-16 | R | monthly.csv |
+| 17 | Stata | term_level.csv |
+| 18-19 | R | term_level.csv |
+| 20-21 | R | monthly.csv |
+| 22-27 | Stata | monthly.csv |
+| 28 | Stata | no_eu.csv |
+| 29-34 | R | no_eu.csv |
+
+## Figures
+
+### Figure 1: Issue attention in German governing parties’ manifestos and adopted legislation (1983-2016)
+
+```{r, fig.width = 10, fig.hiehgt = 8}
+topic_dict <- tribble(
+  ~topic, ~p_topic, ~name,
+  1, 1, "Macroeconomics",
+  2, 2, "Civil Rights", 
+  3, 3, "Health", 
+  4, 4, "Agriculture", 
+  5, 5, "Labor", 
+  6, 6, "Education", 
+  721, 7, "Environment",
+  8, 8, "Energy",
+  10,10, "Transportation", 
+  12,12, "Law and Crime", 
+  13,13, "Social Welfare", 
+  14,14, "Housing", 
+  15,15, "Domestic Commerce", 
+  16,16, "Defense", 
+  17,17, "Technology", 
+  18,18, "Foreign Trade", 
+  19,19, "International Affairs", 
+  2420,20, "Government Operations", 
+  25,25, "Reunification"
+) %>%
+  mutate(label = fct_reorder(paste(p_topic, name, sep = " - "), topic)) %>%
+  select(topic, label)
+
+readr::read_csv("data/monthly.csv", show_col_types = FALSE) %>%
+  group_by(start_date, topic) %>%
+  summarise(n_laws = sum(n_laws), 
+            salience_gov = unique(salience_gov)) %>%
+  dplyr::select(start_date, topic, salience_gov, n_laws) %>%
+  mutate(n_laws = n_laws/5,
+         topic = fct_reorder(factor(topic), as.numeric(topic))) %>%
+  select(start_date, n_laws, salience_gov, topic) %>%
+  mutate(topic = as.numeric(as.character(topic))) %>%
+  pivot_longer(cols = c(n_laws, salience_gov)) %>%
+  left_join(topic_dict) %>%
+  mutate(name = ifelse(name == "n_laws", "Laws", "% of Manifestos")) %>%
+  ggplot(aes(x = start_date)) + 
+  geom_line(aes(y = value, linetype = name)) +
+  facet_wrap(~label) + 
+  scale_y_continuous(sec.axis = sec_axis(~ . *5, "Number of laws")) +
+  theme_minimal() +
+  labs(x = "", y = "Salience in governing\nparties' platform (%)", linetype = "") +
+  theme(legend.position = "top", 
+        axis.title.y.left = element_text(margin = margin(r = 10, l = 10)),
+        axis.title.y.right = element_text(margin = margin(r = 10, l = 10)))
+```
+
+
+### Figure 2: Predicted number of laws adopted during a mandate period, conditional on platform salience
+
+This figure is based on the predicted number of laws as obtained in Stata from Model 4 with the command 'predict'.
+
+```{r, fig.width = 6, fig.height = 4}
+readr::read_csv("data/preds.csv", show_col_types = FALSE) %>%
+  mutate(salience_seat = as.numeric(salience_seat/100)) %>%
+  filter(salience_seat < .15) %>%
+  group_by(start_date, topic, salience_seat) %>%
+  summarise(n_total_law_pred = sum(yhat)) %>%
+  ungroup %>%
+  ggplot(aes(x = salience_seat, y = n_total_law_pred)) + 
+  geom_smooth(method = "lm", se = T, alpha = .02, color = "black") +
+  theme_minimal() +
+  scale_x_continuous(labels = scales::percent_format()) +
+  geom_jitter(alpha = .3) +
+  geom_rug(aes(y = NULL), alpha=.2) +
+  labs(y = "Predicted number of laws", x = "Salience in governing\nparties' platform (%)")
+```
+
+### Figure 4-5
+
+These figures simply depict, without further transformation, the marginal effect as obtained in Stata with the fonction 'margin'.
